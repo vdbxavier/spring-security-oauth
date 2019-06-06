@@ -2,6 +2,8 @@ package org.springframework.security.oauth2.client.token.auth;
 
 import java.io.UnsupportedEncodingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
@@ -17,6 +19,8 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultClientAuthenticationHandler implements ClientAuthenticationHandler {
 
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	public void authenticateTokenRequest(OAuth2ProtectedResourceDetails resource, MultiValueMap<String, String> form,
 			HttpHeaders headers) {
 		if (resource.isAuthenticationRequired()) {
@@ -30,7 +34,8 @@ public class DefaultClientAuthenticationHandler implements ClientAuthenticationH
 				clientSecret = clientSecret == null ? "" : clientSecret;
 				switch (scheme) {
 				case header:
-					form.remove("client_secret");
+					logger.warn("restore client_secret for reach5 !");
+					//form.remove("client_secret");
 					headers.add(
 							"Authorization",
 							String.format(

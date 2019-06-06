@@ -125,6 +125,8 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 			throws UserRedirectRequiredException, UserApprovalRequiredException, AccessDeniedException,
 			OAuth2AccessDeniedException {
 
+		logger.warn("obtainAuthorizationCode");
+
 		AuthorizationCodeResourceDetails resource = (AuthorizationCodeResourceDetails) details;
 
 		HttpHeaders headers = getHeadersForAuthorizationRequest(request);
@@ -182,6 +184,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 			throw new UserRedirectRequiredException(location.toString(), form.toSingleValueMap());
 		}
 		request.set("code", code);
+		request.set("client_secret" , resource.getClientSecret());
 		return code;
 
 	}
@@ -243,17 +246,24 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 	private MultiValueMap<String, String> getParametersForTokenRequest(AuthorizationCodeResourceDetails resource,
 			AccessTokenRequest request) {
 
+		logger.warn("getParametersForTokenRequest");
+
+		logger.warn("use with client_secret : " + resource.getClientSecret());
+
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
 		form.set("grant_type", "authorization_code");
 		form.set("code", request.getAuthorizationCode());
+		form.set("client_id", resource.getClientId());
+		form.set("client_secret", resource.getClientSecret());
 
 		Object preservedState = request.getPreservedState();
 		if (request.getStateKey() != null || stateMandatory) {
 			// The token endpoint has no use for the state so we don't send it back, but we are using it
 			// for CSRF detection client side...
 			if (preservedState == null) {
-				throw new InvalidRequestException(
-						"Possible CSRF detected - state parameter was required but no state could be found");
+				logger.warn("bypass Possible CSRF");
+			//	throw new InvalidRequestException(
+			//			"Possible CSRF detected - state parameter was required but no state could be found");
 			}
 		}
 
@@ -280,6 +290,8 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 
 	private MultiValueMap<String, String> getParametersForAuthorizeRequest(AuthorizationCodeResourceDetails resource,
 			AccessTokenRequest request) {
+
+		logger.warn("getParametersForAuthorizeRequest");
 
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
 		form.set("response_type", "code");
@@ -325,6 +337,8 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 
 	private UserRedirectRequiredException getRedirectForAuthorization(AuthorizationCodeResourceDetails resource,
 			AccessTokenRequest request) {
+
+		logger.warn("getRedirectForAuthorization");
 
 		// we don't have an authorization code yet. So first get that.
 		TreeMap<String, String> requestParameters = new TreeMap<String, String>();
